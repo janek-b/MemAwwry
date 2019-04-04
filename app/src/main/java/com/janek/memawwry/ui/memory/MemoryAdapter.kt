@@ -8,6 +8,8 @@ import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.janek.memawwry.R
 import com.janek.memawwry.data.CardState
 import com.janek.memawwry.data.MemoryCard
@@ -46,8 +48,9 @@ class MemoryCardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(item: MemoryCard, cardClickListener: (MemoryCard) -> Unit) {
         GlideApp.with(itemView.context)
             .load(getImageUrl(item))
-            .fallback(R.drawable.ic_launcher_background)
+            .fallback(R.drawable.dog_paw)
             .centerCrop()
+            .apply(RequestOptions.bitmapTransform(RoundedCorners(8)))
             .into(cardImage)
 
         itemView.setOnClickListener { cardClickListener(item) }

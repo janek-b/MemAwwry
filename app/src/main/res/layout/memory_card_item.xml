@@ -7,9 +7,10 @@
 
     <ImageView
             android:layout_width="200px"
-            android:layout_height="200px" app:srcCompat="@drawable/ic_launcher_background"
+            android:layout_height="200px" app:srcCompat="@drawable/dog_paw"
             android:id="@+id/card_image" android:contentDescription="TODO" app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="8dp"
-            android:layout_marginStart="8dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp"/>
+            android:layout_marginStart="8dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp"
+            tools:srcCompat="@drawable/dog_paw"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
