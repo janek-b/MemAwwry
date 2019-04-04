@@ -5,26 +5,11 @@
                                                    android:layout_width="match_parent"
                                                    android:layout_height="wrap_content">
 
-    <TextView
-            android:text="cardId"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" android:id="@+id/card_id" android:textSize="18sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/img_url" app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-    <TextView
-            android:text="imgUrl"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content" android:id="@+id/img_url"
-            android:textAlignment="center" android:textSize="18sp"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toEndOf="@+id/card_id"
-            app:layout_constraintEnd_toStartOf="@+id/uncovered" app:layout_constraintBottom_toBottomOf="parent"/>
-    <TextView
-            android:text="unCovered"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content" android:id="@+id/uncovered"
-            android:textSize="18sp"
-            app:layout_constraintStart_toEndOf="@+id/img_url"
-            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+    <ImageView
+            android:layout_width="200px"
+            android:layout_height="200px" app:srcCompat="@drawable/ic_launcher_background"
+            android:id="@+id/card_image" android:contentDescription="TODO" app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp" android:layout_marginTop="8dp" android:layout_marginEnd="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

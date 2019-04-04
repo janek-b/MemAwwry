@@ -37,10 +37,6 @@ class GameSelectFragment : Fragment() {
         gameSelection.onGameSelection()
     }
 
-    fun setGameSelection(activity: GameSelection) {
-        gameSelection = activity
-    }
-
     interface GameSelection {
         fun onGameSelection()
     }

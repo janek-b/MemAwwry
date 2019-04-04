@@ -3,39 +3,63 @@ package com.janek.memawwry.ui.memory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.ImageView
+import androidx.annotation.LayoutRes
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.janek.memawwry.R
+import com.janek.memawwry.data.CardState
+import com.janek.memawwry.data.MemoryCard
+import com.janek.memawwry.ui.GlideApp
 import kotlinx.android.synthetic.main.memory_card_item.view.*
 
-class MemoryAdapter(val selectionCallback: (Card, Int) -> Unit) : RecyclerView.Adapter<MemoryCardViewHolder>() {
+class MemoryAdapter(
+    private val cardClickListener: (MemoryCard) -> Unit
+) : ListAdapter<MemoryCard, MemoryCardViewHolder>(
+    MemoryCardDiffCallback()
+) {
 
-    private var items: List<Card> = emptyList()
-
-    fun setCards(list: List<Card>) {
-        items = list
-        notifyDataSetChanged()
-    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoryCardViewHolder {
-        return MemoryCardViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.memory_card_item, parent, false))
-    }
-
-    override fun getItemCount(): Int {
-        return items.size
+        return MemoryCardViewHolder(parent.inflate(R.layout.memory_card_item))
     }
 
     override fun onBindViewHolder(holder: MemoryCardViewHolder, position: Int) {
-        holder.cardId.text = items[position].cardId
-        holder.imgUrl.text = items[position].imageUrl
-        holder.uncovered.text = if (items[position].unCovered) "showing" else "covered"
-
-        holder.cardId.setOnClickListener { selectionCallback(items[position], position) }
+        holder.bind(getItem(position), cardClickListener)
     }
 
 }
 
-class MemoryCardViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val cardId: TextView = view.card_id
-    val imgUrl: TextView = view.img_url
-    val uncovered: TextView = view.uncovered
+class MemoryCardDiffCallback : DiffUtil.ItemCallback<MemoryCard>() {
+    override fun areItemsTheSame(oldItem: MemoryCard, newItem: MemoryCard): Boolean {
+        return oldItem.cardId == newItem.cardId
+    }
+
+    override fun areContentsTheSame(oldItem: MemoryCard, newItem: MemoryCard): Boolean {
+        return oldItem == newItem
+    }
 }
+
+class MemoryCardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private val cardImage: ImageView = itemView.card_image
+
+    fun bind(item: MemoryCard, cardClickListener: (MemoryCard) -> Unit) {
+        GlideApp.with(itemView.context)
+            .load(getImageUrl(item))
+            .fallback(R.drawable.ic_launcher_background)
+            .centerCrop()
+            .into(cardImage)
+
+        itemView.setOnClickListener { cardClickListener(item) }
+    }
+
+    private fun getImageUrl(item: MemoryCard): String? {
+        return if (item.state == CardState.SELECTED || item.state == CardState.UNCOVERED) item.imageUrl else null
+    }
+}
+
+
+private fun ViewGroup.inflate(
+    @LayoutRes layoutRes: Int,
+    attachToRoot: Boolean = false
+): View = LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
