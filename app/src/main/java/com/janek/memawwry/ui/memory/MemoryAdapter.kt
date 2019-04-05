@@ -53,7 +53,7 @@ class MemoryCardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             .apply(RequestOptions.bitmapTransform(RoundedCorners(8)))
             .into(cardImage)
 
-        itemView.setOnClickListener { cardClickListener(item) }
+        itemView.setOnClickListener { if (item.state != CardState.UNCOVERED) cardClickListener(item) }
     }
 
     private fun getImageUrl(item: MemoryCard): String? {

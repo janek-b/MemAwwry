@@ -1,5 +1,7 @@
 package com.janek.memawwry.ui.memory
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.util.Log
@@ -19,14 +21,17 @@ import kotlinx.android.synthetic.main.memory_fragment.*
 class MemoryFragment : Fragment() {
 
     companion object {
-        fun newInstance() = MemoryFragment()
+        fun newInstance(activity: GameSelection) = MemoryFragment().apply { gameSelection = activity }
     }
 
+    private lateinit var gameSelection: GameSelection
     private lateinit var viewModel: MemoryViewModel
     private lateinit var listAdapter: MemoryAdapter
+    private lateinit var gameOverDialog: AlertDialog
 
     private val disposables: CompositeDisposable = CompositeDisposable()
-    private val memoryCardClick: PublishSubject<MemoryEvent.CardSelectEvent> = PublishSubject.create()
+    private val memoryEvents: PublishSubject<MemoryEvent.CardSelectEvent> = PublishSubject.create()
+    private val newGameEvents: PublishSubject<MemoryEvent.NewGameEvent> = PublishSubject.create()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +45,13 @@ class MemoryFragment : Fragment() {
 
         setupCardListView()
 
+        gameOverDialog = AlertDialog.Builder(this.activity)
+            .setMessage("Play Again?")
+            .setTitle("You Won")
+            .setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, id -> startNewGame() })
+            .setNegativeButton("No", DialogInterface.OnClickListener { dialog, id -> goToMainScreen() })
+            .create()
+
         viewModel = ViewModelProviders.of(
             this,
             MemoryViewModelFactory(activity!!.application, MemoryRepository())
@@ -49,15 +61,15 @@ class MemoryFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        viewModel.processInputs(memoryCardClick)
+        viewModel.processInputs(memoryEvents, newGameEvents)
 
         disposables.add(
             viewModel
                 .viewState()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    { vs ->
-                        listAdapter.submitList(vs.adapterList)
+                    {
+                        renderViewState(it)
                     },
                     {
                         Log.d("Error", it.message)
@@ -71,12 +83,29 @@ class MemoryFragment : Fragment() {
         disposables.clear()
     }
 
+    private fun startNewGame() {
+        newGameEvents.onNext(MemoryEvent.NewGameEvent)
+    }
+
+    private fun goToMainScreen() {
+        gameSelection.goToGameSelection()
+    }
+
+    private fun renderViewState(viewState: MemoryViewState) {
+        listAdapter.submitList(viewState.adapterList)
+        if (viewState.gameOver) gameOverDialog.show()
+    }
+
     private fun setupCardListView() {
         val layoutManager = GridLayoutManager(activity, 4)
         game_board.layoutManager = layoutManager
 
 
-        listAdapter = MemoryAdapter { memoryCardClick.onNext(MemoryEvent.CardSelectEvent(it)) }
+        listAdapter = MemoryAdapter { memoryEvents.onNext(MemoryEvent.CardSelectEvent(it)) }
         game_board.adapter = listAdapter
+    }
+
+    interface GameSelection{
+        fun goToGameSelection()
     }
 }

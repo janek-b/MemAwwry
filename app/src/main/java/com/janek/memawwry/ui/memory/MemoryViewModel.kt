@@ -1,6 +1,7 @@
 package com.janek.memawwry.ui.memory
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -17,8 +18,8 @@ import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
 
 class MemoryViewModel(
-    app: Application,
-    repo: MemoryRepository
+    private val app: Application,
+    private val repo: MemoryRepository
 ) : AndroidViewModel(app) {
 
     private lateinit var viewModelDisposable: Disposable
@@ -27,12 +28,8 @@ class MemoryViewModel(
 
     init {
         val viewChanges = eventEmitter
+            .startWith(MemoryEvent.NewGameEvent)
             .compose(eventToResult())
-            .startWith(
-                repo.getPuppyList()
-                    .doOnNext { it.forEach { item -> GlideApp.with(app.applicationContext).load(item.imageUrl).preload() } }
-                    .map { ReadyState.Content(MemoryResult.CardSelectResult(it)) }
-            )
             .publish()
 
         viewChanges.compose(resultToViewState()).subscribe(viewState)
@@ -56,6 +53,7 @@ class MemoryViewModel(
             upstream.publish { o ->
                 Observable.merge(
                     o.ofType(MemoryEvent.ScreenLoadEvent::class.java).compose(onScreenLoad()),
+                    o.ofType(MemoryEvent.NewGameEvent::class.java).compose(onNewGame()),
                     o.ofType(MemoryEvent.CardSelectEvent::class.java).compose(onCardSelect())
                 )
             }
@@ -69,7 +67,14 @@ class MemoryViewModel(
                     is ReadyState.Content -> {
                         when (result.packet) {
                             is MemoryResult.ScreenLoadResult -> vs
-                            is MemoryResult.CardSelectResult -> vs.copy(adapterList = result.packet.cards)
+                            is MemoryResult.NewGameResult -> vs.copy(
+                                    adapterList = result.packet.cards,
+                                    gameOver = result.packet.cards.all { it.state == CardState.UNCOVERED }
+                                )
+                            is MemoryResult.CardSelectResult -> vs.copy(
+                                    adapterList = result.packet.cards,
+                                    gameOver = result.packet.cards.all { it.state == CardState.UNCOVERED }
+                                )
                         }
                     }
                     is ReadyState.Loading -> vs
@@ -77,6 +82,17 @@ class MemoryViewModel(
                 }
             }
                 .distinctUntilChanged()
+        }
+    }
+
+    private fun onNewGame(): ObservableTransformer<MemoryEvent.NewGameEvent, ReadyState<MemoryResult.NewGameResult>> {
+        return ObservableTransformer { upstream ->
+            upstream.switchMap {
+                repo.getPuppyList()
+                    .doOnNext { it.forEach { item -> GlideApp.with(app.applicationContext).load(item.imageUrl).preload() } }
+                    .map { ReadyState.Content(MemoryResult.NewGameResult(it)) }
+            }
+
         }
     }
 

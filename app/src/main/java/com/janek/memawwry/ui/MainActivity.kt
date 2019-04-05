@@ -6,12 +6,16 @@ import com.janek.memawwry.R
 import com.janek.memawwry.ui.gameselect.GameSelectFragment
 import com.janek.memawwry.ui.memory.MemoryFragment
 
-class MainActivity : AppCompatActivity(), GameSelectFragment.GameSelection {
+class MainActivity : AppCompatActivity(), GameSelectFragment.GameSelection, MemoryFragment.GameSelection {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        goToGameSelection()
+    }
+
+    override fun goToGameSelection() {
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragmentContainer, GameSelectFragment.newInstance(this)).commit()
@@ -21,6 +25,6 @@ class MainActivity : AppCompatActivity(), GameSelectFragment.GameSelection {
         supportFragmentManager
             .beginTransaction()
             .addToBackStack("puppyMemory")
-            .replace(R.id.fragmentContainer, MemoryFragment.newInstance(), null).commit()
+            .replace(R.id.fragmentContainer, MemoryFragment.newInstance(this), null).commit()
     }
 }
